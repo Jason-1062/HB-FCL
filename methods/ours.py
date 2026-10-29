@@ -459,12 +459,13 @@ class Ours(BaseLearner):
 
         tse_rounds = int(self.args["tse_com_rounds"][task_id])
 
-        criterion = AsymmetricLoss(
-            gamma_neg=float(self.args.get("tse_gamma_neg", 4.0)),
-            gamma_pos=float(self.args.get("tse_gamma_pos", 1.0)),
-            clip=float(self.args.get("tse_clip", 0.05)),
-            eps=float(self.args.get("tse_eps", 1e-8)),
-        )
+        # criterion = AsymmetricLoss(
+        #     gamma_neg=float(self.args.get("tse_gamma_neg", 4.0)),
+        #     gamma_pos=float(self.args.get("tse_gamma_pos", 1.0)),
+        #     clip=float(self.args.get("tse_clip", 0.05)),
+        #     eps=float(self.args.get("tse_eps", 1e-8)),
+        # )
+        criterion = nn.BCEWithLogitsLoss()
 
         scheduler_optimizer = torch.optim.SGD(
             global_tse.parameters(),

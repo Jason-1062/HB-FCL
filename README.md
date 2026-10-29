@@ -13,9 +13,10 @@
   <img src="https://img.shields.io/badge/Setting-Federated%20Learning-1B7B79?style=flat-square" alt="Setting: Federated Learning">
   <img src="https://img.shields.io/badge/Setting-Continual%20Learning-526779?style=flat-square" alt="Setting: Continual Learning">
 </p>
-*Source code for HB-FCL, a framework for medical image diagnosis.*
 
 </div>
+
+*Source code for HB-FCL, **The paper experimental data checkpoints for HB-FCL are located in the `checkpoints` folder.***
 
 ---
 
@@ -92,6 +93,7 @@ The loaders support four public chest X-ray datasets.
   2. Re-split the combined data into `train.csv` and `val.csv` using an 8:2 ratio.
   3. Use the test set provided by [CheXlocalize](https://stanford.redivis.com/datasets/efx9-5nspnbb4b).
 - **Label handling:** Exclude samples annotated with **Pneumonia, Enlarged Cardiomediastinum, Lung Lesion, Atelectasis, Pleural Other, Fracture,** or **Cardiomegaly**. Ignore the **Support Devices** label; samples with only this label are re-classified as **Normal**. *(Implemented.)*
+-  uncertain and missing labels are mapped to 0 during preprocessing.
 
 ### 4. NIH Chest X-rays 14
 
@@ -158,7 +160,7 @@ python main.py \
 | Argument | Description |
 |---|---|
 | `--dataset_names` | Dataset names for each task; must match keys in `DataManager.dataset_map`. |
-| `--classes` | Number of new classes introduced in each task, in the same order as `--dataset_names`. |
+| `--classes` | Number of **new classes** introduced in each task, in the same order as `--dataset_names`. |
 | `--data_paths` | Paths to the datasets, in the same order as `--dataset_names`. |
 
 > **Important:** Keep the order of `--dataset_names`, `--classes`, and `--data_paths` consistent.
@@ -175,7 +177,7 @@ By default, experimental results are saved under `result/`. Generated artifacts,
 
 ## Paper Training Configurations and Hyperparameters
 
-The configurations below summarize the settings used in the paper experiments. **The experimental data checkpoints for HB-FCL are located in the `checkpoints` folder.**
+The configurations below summarize the settings used in the paper experiments. 
 
 ### 1. Client Training (Classifier Backbone)
 
