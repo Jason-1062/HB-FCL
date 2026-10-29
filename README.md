@@ -1,20 +1,38 @@
+<div align="center">
+
 # HB-FCL
 
-The source code for 📄 **HB-FCL (High-fidelity Boundary-aware Federated Continual Learning for Medical Image Diagnosis)**.
+**High-fidelity Boundary-aware Federated Continual Learning Framework for Medical Image Diagnosis**
 
-## 📑 Table of Contents
+<p>
+  <img src="framework.png" alt="HB-FCL framework overview" width="100%">
+</p>
 
-- [📋 Repository Layout](#-repository-layout)
-- [⚙️ Environment Setup](#-environment-setup)
-- [🗂️ Datasets](#-datasets)
-- [🚀 Running an Experiment](#-running-an-experiment)
-- [📊 Results](#-results)
+<p>
+  <img src="https://img.shields.io/badge/Domain-Medical%20Imaging-0B3D5F?style=flat-square" alt="Domain: Medical Imaging">
+  <img src="https://img.shields.io/badge/Setting-Federated%20Learning-1B7B79?style=flat-square" alt="Setting: Federated Learning">
+  <img src="https://img.shields.io/badge/Setting-Continual%20Learning-526779?style=flat-square" alt="Setting: Continual Learning">
+</p>
+*Source code for HB-FCL, a framework for medical image diagnosis.*
+
+</div>
 
 ---
 
-## 📋 Repository Layout
+## Contents
 
-```
+- [Repository Layout](#repository-layout)
+- [Environment Setup](#environment-setup)
+- [Datasets](#datasets)
+- [Running an Experiment](#running-an-experiment)
+- [Results](#results)
+- [Paper Training Configurations and Hyperparameters](#paper-training-configurations-and-hyperparameters)
+
+---
+
+## Repository Layout
+
+```text
 HB-FCL/
 ├── main.py                     # Command-line entry point for sequential federated training
 ├── methods/                    # Continual and federated learning algorithms
@@ -25,11 +43,9 @@ HB-FCL/
 └── assist/                     # Optional scripts for TSE training and synthetic-data generation
 ```
 
----
+## Environment Setup
 
-## ⚙️ Environment Setup
-
-The code has been tested on **NVIDIA RTX 5880 Ada Generation 48G GPU**.
+The code has been tested on an **NVIDIA RTX 5880 Ada Generation 48G GPU**.
 
 ### 1. Install PyTorch
 
@@ -45,52 +61,56 @@ pip install -r requirements.txt
 
 ### 3. Pretrained Model Checkpoints
 
-The following pretrained models require local checkpoints (the code does **not** download weights automatically):
+The following pretrained models require local checkpoints; the code does **not** download their weights automatically.
 
-- 🧠 Diffusion model: [Roentgen-v2](https://huggingface.co/stanfordmimi/RoentGen-v2) (MINIM)
-- 🧠 CLIP model: [kaveh/rclip](https://huggingface.co/kaveh/rclip)
+| Component | Model |
+|---|---|
+| Diffusion model | [RoentGen-v2](https://huggingface.co/stanfordmimi/RoentGen-v2) (MINIM) |
+| CLIP model | [kaveh/rclip](https://huggingface.co/kaveh/rclip) |
 
-Please download and place them in accessible paths, then specify the path when running experiments (see examples below).
+Download the checkpoints, place them in accessible locations, and specify their paths when running experiments (see the example below).
 
----
+## Datasets
 
-## 🗂️ Datasets
+The loaders support four public chest X-ray datasets.
 
-The loaders support four public chest X-ray datasets:
+### 1. CXR
 
-1. **CXR**  
-   - Source: [CXR Dataset](https://www.heywhale.com/mw/dataset/62c2ac49913a54a66037f872)  
-   - Loader: `dataset/CXR_with_split_Dataset.py`
+- **Source:** [CXR Dataset](https://www.heywhale.com/mw/dataset/62c2ac49913a54a66037f872)
+- **Loader:** `dataset/CXR_with_split_Dataset.py`
 
-2. **ChestXR**  
-   - Source: [CXR COVID-19 Grand Challenge](https://cxr-covid19.grand-challenge.org/)  
-   - Alternative download: [Google Drive](https://drive.google.com/file/d/1MRtZkovJS5iEl6W4ctkOsb1nAfTZU1r1/view?usp=drive_link)
+### 2. ChestXR
 
-3. **CheXpert**  
-   - Source: [Kaggle CheXpert](https://www.kaggle.com/datasets/ashery/chexpert)  
-   - Preprocessing:  
-     - Combine the original `train.csv` and `val.csv` files.  
-     - Re-split them into `train.csv` and `val.csv` using an 8:2 ratio.  
-     - Use the test set provided by the [CheXlocalize](https://stanford.redivis.com/datasets/efx9-5nspnbb4b) dataset.
+- **Source:** [CXR COVID-19 Grand Challenge](https://cxr-covid19.grand-challenge.org/)
+- **Alternative download:** [Google Drive](https://drive.google.com/file/d/1MRtZkovJS5iEl6W4ctkOsb1nAfTZU1r1/view?usp=drive_link)
 
-4. **NIH Chest X-rays 14**  
-   - Source: [Kaggle NIH Chest X-ray 14 (224×224 resized)](https://www.kaggle.com/datasets/khanfashee/nih-chest-x-ray-14-224x224-resized)  
-   - Preprocessing:  
-     - Split `train_val_list_NIH.txt` into `train.txt` and `val.txt` with an 8:2 ratio.
+### 3. CheXpert
 
-**Customization**: You can modify dataset names and loading logic in `DataManager.dataset_map` within `utils/data_manager.py`.
+- **Source:** [Kaggle CheXpert](https://www.kaggle.com/datasets/ashery/chexpert)
+- **Preprocessing:**
+  1. Combine the original `train.csv` and `val.csv` files.
+  2. Re-split the combined data into `train.csv` and `val.csv` using an 8:2 ratio.
+  3. Use the test set provided by [CheXlocalize](https://stanford.redivis.com/datasets/efx9-5nspnbb4b).
+- **Label handling:** Exclude samples annotated with **Pneumonia, Enlarged Cardiomediastinum, Lung Lesion, Atelectasis, Pleural Other, Fracture,** or **Cardiomegaly**. Ignore the **Support Devices** label; samples with only this label are re-classified as **Normal**. *(Implemented.)*
 
----
+### 4. NIH Chest X-rays 14
 
-## 🚀 Running an Experiment
+- **Source:** [Kaggle NIH Chest X-ray 14 (224×224 resized)](https://www.kaggle.com/datasets/khanfashee/nih-chest-x-ray-14-224x224-resized)
+- **Preprocessing:**
+  1. Split `train_val_list_NIH.txt` into `train.txt` and `val.txt` using an 8:2 ratio.
+- **Label handling:** Exclude samples annotated with **Pneumonia, Consolidation, Pneumothorax, Emphysema, Fibrosis, Hernia,** or **Pleural Thickening**. *(Implemented.)*
 
-The following command provides a complete example for running HB-FCL across four sequential tasks:
+> **Customization:** Dataset names and loading logic can be modified in `DataManager.dataset_map` in `utils/data_manager.py`.
+
+## Running an Experiment
+
+The following example runs HB-FCL across four sequential tasks:
 
 ```text
 CXR → ChestXR → CheXpert → NIH14
 ```
 
-### ▶️ Example
+### Example
 
 ```bash
 python main.py \
@@ -133,24 +153,80 @@ python main.py \
     --minim_local_epochs 2
 ```
 
-### 🔧 Important Arguments
+### Important Arguments
 
 | Argument | Description |
-|----------|-------------|
-| `--dataset_names` | Names of datasets for each task (must match keys in `DataManager.dataset_map`) |
-| `--classes` | Number of new classes introduced in each task (order corresponds to `--dataset_names`) |
-| `--data_paths` | Paths to each dataset (order corresponds to `--dataset_names`) |
+|---|---|
+| `--dataset_names` | Dataset names for each task; must match keys in `DataManager.dataset_map`. |
+| `--classes` | Number of new classes introduced in each task, in the same order as `--dataset_names`. |
+| `--data_paths` | Paths to the datasets, in the same order as `--dataset_names`. |
 
-> ⚠️ Ensure the order of the three arguments above is consistent.
+> **Important:** Keep the order of `--dataset_names`, `--classes`, and `--data_paths` consistent.
 
-For a full list of options, run:
+For the complete list of command-line options, run:
 
 ```bash
 python main.py --help
 ```
 
----
+## Results
 
-## 📊 Results
+By default, experimental results are saved under `result/`. Generated artifacts, including synthetic data and logs, are saved under `run/`.
 
-By default, experimental results are saved under `result/` and generated artifacts (e.g., synthetic data, logs) under `run/`.
+## Paper Training Configurations and Hyperparameters
+
+The configurations below summarize the settings used in the paper experiments.
+
+### 1. Client Training (Classifier Backbone)
+
+| Parameter | Value |
+|---|---|
+| Backbone | DenseNet121 |
+| Total clients | 5 |
+| Communication rounds | 10 |
+| Local epochs | 2 per round |
+| Batch size | 64 |
+| Optimizer | AdamW |
+| Initial learning rate | `1e-4` |
+| $\beta_1$ | `0.9` |
+| $\beta_2$ | `0.999` |
+| Weight decay | `1e-4` |
+
+### 2. Generator Network (`RoentGen-v2`)
+
+| Parameter | Value |
+|---|---|
+| Base model | `RoentGen-v2`|
+| Communication rounds | 10 |
+| Local epochs | 2 per round |
+| Batch size | 8 per device |
+| Gradient accumulation | 4 |
+| Effective batch size | 32 |
+| Optimizer | AdamW |
+| Learning rate | `5e-6` |
+| $\beta_1$ | `0.9` |
+| $\beta_2$ | `0.999` |
+| Weight decay | `0.01` |
+| $\epsilon$ | `1e-8` |
+| Gradient clipping | Maximum norm `1.0` |
+| Data and precision | Center-cropped to `256 * 256`; mixed precision (`fp16`) |
+| Inference steps | 50 |
+| Generation batch size | 16 |
+
+The generator batch configuration uses gradient accumulation to achieve an effective batch size of 32, optimized for GPUs with **48 GB VRAM or less**.
+
+**Offline synthetic pool.** To eliminate redundant generation and accelerate repeated experimental runs, candidate images were pre-synthesized offline. After training each task's global generator via federated learning, its corresponding synthetic subset was generated once, accumulating a total offline pool of 53,000 candidate images across all tasks. This pool was reused across all main and ablation paper experiments.
+
+### 3. Task-Specific Selection Expert
+
+| Parameter | Value |
+|---|---|
+| Backbone | DenseNet121 |
+| Communication rounds | 30 |
+| Local epochs | 2 per round |
+| Batch size | 64 |
+| Optimizer | AdamW |
+| Initial learning rate | `1e-4` |
+| $\beta_1$ | `0.9` |
+| $\beta_2$ | `0.999` |
+| Weight decay | `1e-4` |
