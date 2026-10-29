@@ -175,7 +175,7 @@ By default, experimental results are saved under `result/`. Generated artifacts,
 
 ## Paper Training Configurations and Hyperparameters
 
-The configurations below summarize the settings used in the paper experiments.
+The configurations below summarize the settings used in the paper experiments. **The experimental data checkpoints for HB-FCL are located in the `checkpoints` folder.**
 
 ### 1. Client Training (Classifier Backbone)
 
